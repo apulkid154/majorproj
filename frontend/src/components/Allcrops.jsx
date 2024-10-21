@@ -1,82 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import FarmerNav from './FarmerNav';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Allcrops = () => {
     const [crops, setCrops] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:4000/api/cropdata');
+                const response = await axios.get('http://localhost:3000/api/crop/cropdata');
                 setCrops(response.data);
             } catch (error) {
                 console.error('Error fetching crops:', error);
-                // Handle error (e.g., display error message)
             }
         };
 
         fetchData();
     }, []);
 
-    const getTimeRemaining = (endDate) => {
-        const total = Date.parse(endDate) - Date.now();
-        const days = Math.floor(total / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((total / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((total / 1000 / 60) % 60);
-        const seconds = Math.floor((total / 1000) % 60);
-
-        return { days, hours, minutes, seconds };
-    };
-
-    const handleSelectCrop = (cropId) => {
-        // Handle crop selection (e.g., add to cart, navigate to details page)
-        console.log('Selected crop:', cropId);
-    };
+// const handleSelectCrop = (cropId) => {
+//         // Redirect to the CropDetails page
+//         navigate(`/farmer/cropdetails/${cropId}`);  // Redirects to the crop details route
+//     };
 
     return (
-        <div>
-            <FarmerNav />   
-            <h1 className="text-3xl font-bold mb-4">All Crops</h1>
-            {crops.length > 0 ? (
-                <div className="grid grid-cols-3 gap-4">
-                    {crops.map(crop => (
-                        <div key={crop._id} className="bg-gray-200 p-4 rounded-lg">
-                            {crop.cropimage1 && (
-                                <img
-                                    src={`data:${crop.cropimage1.contentType};base64,${crop.cropimage1.data}`}
-                                    alt={crop.cropname}
-                                    className="w-full h-32 object-cover mb-2 rounded-md"
-                                />
-                            )}
-                            <div className="flex justify-between items-center mb-2">
-                                <p className="font-bold">{crop.cropname}</p>
-                                <p className="text-gray-600">${crop.basePrice}</p>
+        <div className="min-h-screen bg-gray-100 ">
+            <FarmerNav />
+            <div className="container mx-auto">
+                <h1 className="text-4xl font-bold text-center mb-6">All Crops</h1>
+                {crops.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {crops.map(crop => (
+                            <div key={crop._id} className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                                <div className="relative">
+                                    {crop.cropimage1 ? (
+                                        <img
+                                            src={`data:${crop.cropimage1.contentType};base64,${crop.cropimage1.data}`}
+                                            alt={crop.cropname}
+                                            className="w-full h-48 object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+                                            No Image
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="text-xl font-bold mb-2">{crop.crop}</h3>
+                                    <p className="text-gray-600">Type: {crop.croptype}</p>
+                                    <p className="text-gray-600">Price per kg: ₹{crop.basePrice}</p>
+                                    {/* <p className="text-gray-600">Weight: {crop.weight} kg</p> */}
+                                    <p className="text-gray-600">Region: {crop.region}</p>
+                                    <p className="text-gray-600">State: {crop.state}</p>
+
+                                    <div className="flex justify-between items-center mt-4">
+                                        <button
+                                            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                                            onClick={() => navigate(`/farmer/cropdetails/${crop._id}`)}  // Direct navigation here
+                                        >
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-gray-600 mb-2">{crop.description}</p>
-                            <p className="text-gray-600 mb-2">{crop.weight} kg</p>
-                            <p className="text-gray-600 mb-2">Region: {crop.region}, State: {crop.state}</p>
-                            <p className="text-gray-600 mb-2">Type: {crop.type}</p>
-                            <p className="text-gray-600 mb-2">Category: {crop.category}</p>
-                            <div className="text-gray-600 mb-2">
-                                Start Date: {crop.startDate ? new Date(crop.startDate).toLocaleDateString() : 'N/A'}<br />
-                                End Date: {crop.endDate ? new Date(crop.endDate).toLocaleDateString() : 'N/A'}
-                            </div>
-                            <div className="text-gray-600 mb-2">
-                                Time Remaining: {getTimeRemaining(crop.endDate).days} days, {getTimeRemaining(crop.endDate).hours} hours, {getTimeRemaining(crop.endDate).minutes} minutes, {getTimeRemaining(crop.endDate).seconds} seconds
-                            </div>
-                            <button
-                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                                onClick={() => handleSelectCrop(crop._id)}
-                            >
-                                Select Crop
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <p>No crops available</p>
-            )}
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-center text-gray-600">No crops available</p>
+                )}
+            </div>
         </div>
     );
 };

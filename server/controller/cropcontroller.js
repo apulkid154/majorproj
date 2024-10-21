@@ -50,6 +50,27 @@ exports.getAllCrops = async (req, res) => {
     }
 };
 
+exports.getCropById = async (req, res) => {
+    try {
+        const cropId = req.params.id; // Fetch the correct ID parameter
+
+        const crop = await Crop.findById(cropId); // Retrieve the crop using the provided ID
+
+        if (!crop) {
+            return res.status(404).json({ message: "Crop not found" });
+        }
+
+        res.status(200).json(crop); // Return crop details
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            data: "Internal server error",
+            message: error.message,
+        });
+    }
+};
+
+
 exports.updateCrop = async (req, res) => {
     try {
         const id = req.params.id;

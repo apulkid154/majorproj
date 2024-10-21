@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const nodemailer = require('nodemailer'); // Import Nodemailer
+const Farmer = require('./farmerModel');
 
 // Define Crop Schema
 const cropSchema = new mongoose.Schema({
@@ -46,17 +47,42 @@ const cropSchema = new mongoose.Schema({
         required: true
     },
     description: {
-        type: String
+        type: String,
+        default: "" // Default to an empty string if not provided
     },
     cropimage1: {
         type: String // For storing image URL or file path
     },
-    cropimage2: {
-        type: String // For storing image URL or file path
+    // cropimage2: {
+    //     type: String // For storing image URL or file path
+    // },
+    // cropimage3: {
+    //     type: String // For storing image URL or file path
+    // },
+    isAuction: {
+        type: Boolean,
+        default: false // Default to false (not for auction)
     },
-    cropimage3: {
-        type: String // For storing image URL or file path
+    basePrice: {
+        type: Number,
+        default: 0 // Default to 0 if not provided
+    },
+    startDate: {
+        type: Date // Optional start date for auction
+    },
+    endDate: {
+        type: Date // Optional end date for auction
+    },
+    quantity: {
+        type: Number, // Quantity in kg
+        required: true
+    },
+    farmer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Farmer',  // Reference to the Farmer model
+        required: true  // Farmer is required for each crop
     }
+
 });
 
 // Create Crop model
@@ -91,6 +117,12 @@ cropSchema.post("save", async function(doc) {
                     <li><strong>Region:</strong> ${doc.region}</li>
                     <li><strong>State:</strong> ${doc.state}</li>
                     <li><strong>Season:</strong> ${doc.season}</li>
+                    <li><strong>Auction:</strong> ${doc.isAuction ? 'Yes' : 'No'}</li>
+                    ${doc.isAuction ? `
+                        <li><strong>Base Price:</strong> ₹${doc.basePrice}</li>
+                        <li><strong>Auction Start Date:</strong> ${doc.startDate ? new Date(doc.startDate).toLocaleDateString() : 'N/A'}</li>
+                        <li><strong>Auction End Date:</strong> ${doc.endDate ? new Date(doc.endDate).toLocaleDateString() : 'N/A'}</li>
+                    ` : ''}
                 </ul>
                 <p>Thank you for using KrishiSahyog!</p>
             `,

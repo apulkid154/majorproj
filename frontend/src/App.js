@@ -12,6 +12,8 @@ import AdminNav from './components/AdminNav';
 import Allcrops from './components/Allcrops';
 import BidderList from './components/BidderList';
 import MyCropList from './components/MyCropList';
+import CropDetails from './components/CropDetails';
+// import Marketplace from './components/Marketplace';
 
 const App = () => {
   return (
@@ -28,8 +30,11 @@ const App = () => {
             <Route path="/farmer/all-crops" element={<Allcrops />} />
             <Route path="/farmer/add-crop" element={<CropForm />} />
             <Route path="/farmer/my-crop-list" element={<MyCropList />} />
+            {/* <Route path='/marketplace' element={<Marketplace/>} /> */}
             <Route path="/farmer/bidder-list" element={<BidderList />} />
-         
+          <Route path="/farmer/cropdetails/:cropid" element={<CropDetails />} />
+
+
           <Route path="/buyer" element={<BuyerNav />} />
           <Route path="/admin" element={<AdminNav />} />
         </Routes>
