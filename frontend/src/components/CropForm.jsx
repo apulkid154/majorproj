@@ -1,166 +1,352 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+// import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FarmerNav from './FarmerNav';
-import toast from 'react-hot-toast';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
-const CropForm = () => {
+const AddCropForm = () => {
+  // State to manage form inputs
   const [cropData, setCropData] = useState({
-    cropname: '',
-    startdate: new Date().toISOString().slice(0, 10),
-    enddate: '',
+    crop: '',
+    croptype: 'pulses',
     email: '',
-    cropimage1: {
-      data: null,
-      contentType: ''
-    },
-    cropimage2: {
-      data: null,
-      contentType: ''
-    },
-    basePrice: 0,
-    type: '',
-    category: '',
-    weight: 0,
-    harvestdate:'',
-    season:'',
-    region: '',
+    harvestdate: '',
+    season: '',
     state: '',
+    pricePerKg: '',
+    quantity: '',
+    soiltype: '',
+    region: '',
     description: '',
-   
+    cropimage1: '',
+    isAuction: false,
+    basePrice: '',
+    startDate: '',
+    endDate: '',
+    quantity: '',
   });
 
+  // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCropData({ ...cropData, [name]: value });
-    console.log(cropData);
+    const { name, value, type, checked } = e.target;
+    setCropData({
+      ...cropData,
+      [name]: type === 'checkbox' ? checked : value,
+    });
   };
-
-  const handleImageChange = (e) => {
-    const { name, files } = e.target;
-    const file = files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onloadend = () => {
-      setCropData({
-        ...cropData,
-        [name]: {
-          data: reader.result,
-          contentType: file.type
-        }
-      });
-      console.log(cropData);
-    };
+  const resetForm = () => {
+    setCropData(initialCropData);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Create a FormData object to send the data
+    const formData = new FormData();
+    for (const key in cropData) {
+      formData.append(key, cropData[key]);
+    }
+
     try {
-      const response = await axios.post('http://localhost:4000/api/createcrop', cropData);
-      console.log(response.data);
-      toast.success('Crop added successfully!');
-      setCropData({
-        cropname: '',
-        startdate: '',
-        enddate: '',
-        email: '',
-        cropimage1: {
-          data: null,
-          contentType: ''
+      const response = await axios.post('http://localhost:3000/api/crop/createcrop', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
         },
-        cropimage2: {
-          data: null,
-          contentType: ''
-        },
-        basePrice: 0,
-        type: '',
-        category: '',
-        weight: 0,
-        harvestdate:'',
-        season:'',
-        region: '',
-        state: '',
-        description: '',
-        
       });
+      console.log('Crop data submitted successfully:', response.data);
+       toast.success('Crop added successfully!');
+       resetForm();
+      // You can handle success response here (e.g., show a success message, reset the form)
     } catch (error) {
-      console.error('Error creating crop:', error);
-      toast.error('Error adding crop. Please try again later.');
+      console.error('Error submitting crop data:', error);
+      toast.error('Error submitting crop data.');
+      // You can handle error response here (e.g., show an error message)
     }
   };
 
   return (
     <>
-    <FarmerNav/>
-    <div className="max-w-lg mx-auto p-4">
-  <h2 className="text-2xl font-bold mb-4">Add Crop</h2>
-  <form onSubmit={handleSubmit} className="space-y-4">
-    <div>
-      <label htmlFor="cropname">Crop Name:</label>
-      <input type="text" name="cropname" value={cropData.cropname} onChange={handleChange} placeholder="Crop Name" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div className="grid grid-cols-2 gap-4">
-      <label htmlFor="startdate">Start Date:</label>
-      <input type="date" name="startdate" value={cropData.startdate} onChange={handleChange} required className="border rounded-md px-3 py-2" disabled/>
-      <label htmlFor="enddate">End Date:</label>
-      <input type="date" name="enddate" value={cropData.enddate} onChange={handleChange} required className="border rounded-md px-3 py-2" />
-    </div>
-    <div>
-      <label htmlFor="email">Email:</label>
-      <input type="email" name="email" value={cropData.email} onChange={handleChange} placeholder="Email" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div className="grid grid-cols-2 gap-4">
-      <label htmlFor="cropimage1">Crop Image 1:</label>
-      <input type="file" name="cropimage1" onChange={handleImageChange} className="border rounded-md px-3 py-2" />
-      <label htmlFor="cropimage2">Crop Image 2:</label>
-      <input type="file" name="cropimage2" onChange={handleImageChange} className="border rounded-md px-3 py-2" />
-    </div>
-    <div>
-      <label htmlFor="basePrice">Base Price:</label>
-      <input type="number" name="basePrice" value={cropData.basePrice} onChange={handleChange} placeholder="Base Price" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div>
-      <label htmlFor="type">Type:</label>
-      <select name="type" value={cropData.type} onChange={handleChange} required className="border rounded-md px-3 py-2 w-full">
-        <option value="">Select Type</option>
-        <option value="fruit">Fruit</option>
-        <option value="vegetable">Vegetable</option>
-      </select>
-    </div>
-    <div>
-      <label htmlFor="category">Category:</label>
-      <input type="text" name="category" value={cropData.category} onChange={handleChange} placeholder="Category" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div>
-      <label htmlFor="weight">Weight:</label>
-      <input type="number" name="weight" value={cropData.weight} onChange={handleChange} placeholder="Weight" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div>
-      <label htmlFor="region">Region:</label>
-      <input type="text" name="region" value={cropData.region} onChange={handleChange} placeholder="Region" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div>
-      <label htmlFor="state">State:</label>
-      <input type="text" name="state" value={cropData.state} onChange={handleChange} placeholder="State" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div>
-      <label htmlFor="harvestdate">Harvest Date:</label>
-      <input type="date" name="harvestdate" value={cropData.harvestdate} onChange={handleChange} required className="border rounded-md px-3 py-2"/>
-    </div>
-    <div>
-      <label htmlFor="season">Season</label>
-      <input type="text" name="season" value={cropData.season} onChange={handleChange} placeholder="Season" required className="border rounded-md px-3 py-2 w-full" />
-    </div>
-    <div>
-      <label htmlFor="description">Description:</label>
-      <textarea name="description" value={cropData.description} onChange={handleChange} placeholder="Description" className="border rounded-md px-3 py-2 w-full"></textarea>
-    </div>
-    <button type="submit" className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-md w-full">Add Crop</button>
-  </form>
+    <FarmerNav /> 
+       <div className="max-w-4xl mx-auto mt-8 p-6 bg-gray-100 shadow-lg rounded-lg">
+        <form
+    
+      onSubmit={handleSubmit}
+      className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+    >
+      {/* Crop Name */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Crop Name
+        </label>
+        <input
+          type="text"
+          name="crop"
+          value={cropData.crop}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Crop Type */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Crop Type
+        </label>
+        <select
+          name="croptype"
+          value={cropData.croptype}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        >
+          <option value="pulses">Pulses</option>
+          <option value="fruit">Fruit</option>
+          <option value="vegetable">Vegetable</option>
+        </select>
+      </div>
+
+      {/* Email */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Email
+        </label>
+        <input
+          type="email"
+          name="email"
+          value={cropData.email}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Harvest Date */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Harvest Date
+        </label>
+        <input
+          type="date"
+          name="harvestdate"
+          value={cropData.harvestdate}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Season */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Season
+        </label>
+        <input
+          type="text"
+          name="season"
+          value={cropData.season}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* State */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          State
+        </label>
+        <input
+          type="text"
+          name="state"
+          value={cropData.state}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Price per Kg */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Price per Kg
+        </label>
+        <input
+          type="number"
+          name="pricePerKg"
+          value={cropData.pricePerKg}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Quantity */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Quantity (in kg)
+        </label>
+        <input
+          type="number"
+          name="quantity"
+          value={cropData.quantity}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Soil Type */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Soil Type
+        </label>
+        <input
+          type="text"
+          name="soiltype"
+          value={cropData.soiltype}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Region */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Region
+        </label>
+        <input
+          type="text"
+          name="region"
+          value={cropData.region}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+      {/* Description */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Description
+        </label>
+        <textarea
+          name="description"
+          value={cropData.description}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      {/* Crop Image 1 */}
+      <div className="mb-4">
+  <label className="block text-gray-700 text-sm font-bold mb-2">
+    Crop Image 1
+  </label>
+  <input
+    type="file"
+    name="cropimage1"
+    onChange={(e) => setCropData({ ...cropData, cropimage1: e.target.files[0] })}
+    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+    accept="image/*"  // Restrict file types to images only
+  />
 </div>
 
+
+      {/* Auction */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Auction
+        </label>
+        <input
+          type="checkbox"
+          name="isAuction"
+          checked={cropData.isAuction}
+          onChange={handleChange}
+          className="mr-2 leading-tight"
+        />
+        <span className="text-sm">Enable Auction</span>
+      </div>
+
+      {/* Base Price (for Auction) */}
+      {cropData.isAuction && (
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-bold mb-2">
+            Base Price (for Auction)
+          </label>
+          <input
+            type="number"
+            name="basePrice"
+            value={cropData.basePrice}
+            onChange={handleChange}
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          />
+        </div>
+      )}
+
+      {/* Auction Dates */}
+      {cropData.isAuction && (
+        <>
+          <div className="mb-4">
+  <label className="block text-gray-700 text-sm font-bold mb-2">
+    Auction Start Date
+  </label>
+  <input
+    type="date"
+    name="startDate"
+    value={cropData.startDate}
+    onChange={handleChange}
+    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+    min={new Date().toISOString().split("T")[0]}  // Set the minimum date to today's date
+  />
+</div>
+
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Auction End Date
+            </label>
+            <input
+              type="date"
+              name="endDate"
+              value={cropData.endDate}
+              onChange={handleChange}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+          <div className="mb-4">
+        <label className="block text-gray-700 text-sm font-bold mb-2">
+          Quantity (in kg)
+        </label>
+        <input
+          type="number"
+          name="quantity"
+          value={cropData.quantity}
+          onChange={handleChange}
+          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          required
+        />
+      </div>
+
+        </>
+      )}
+
+      {/* Submit Button */}
+      <div className="flex items-center justify-between">
+        <button
+          type="submit"
+          className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-700 hover:bg-green-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:bg-green-700 disabled:opacity-50"
+        >
+          Add Crop
+        </button>
+      </div>
+    </form>
+    </div>
     </>
+
+   
+    
   );
-  
 };
 
-export default CropForm;
+export default AddCropForm;
