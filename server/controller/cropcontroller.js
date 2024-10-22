@@ -1,9 +1,33 @@
 const Crop = require('../models/cropModel');
+const cloudinary = require("cloudinary").v2;
 
 exports.createCrop = async (req, res) => {
     try {
-        const crop = await Crop.create(req.body); // Add all details from req.body to the database
-        res.status(200).json({
+        // Check if imageFile exists in the request
+        if (!req.files || !req.files.imageFile) {
+            return res.status(400).json({ success: false, message: 'Image file is required' });
+        }
+
+        const file = req.files.imageFile;
+
+        // Validation for supported file types
+        const supportedTypes = ["jpg", "jpeg", "png"];
+        const fileType = file.name.split('.').pop().toLowerCase();
+
+        if (!isFileTypeSupported(fileType, supportedTypes)) {
+            return res.status(400).json({ success: false, message: 'File format not supported' });
+        }
+
+        // Upload to Cloudinary
+        const response = await uploadFileToCloudinary(file, "krishisahyog");
+
+        // Add all details from req.body to the database
+        const crop = await Crop.create({
+            ...req.body,
+            cropimage1: response.secure_url // Save the image URL
+        });
+
+        res.status(201).json({
             success: true,
             data: crop,
             message: 'Crop created successfully'
@@ -70,7 +94,6 @@ exports.getCropById = async (req, res) => {
     }
 };
 
-
 exports.updateCrop = async (req, res) => {
     try {
         const id = req.params.id;
@@ -88,12 +111,6 @@ exports.updateCrop = async (req, res) => {
         });
     }
 };
-const File = require("../models/cropModel");
-const cloudinary = require("cloudinary").v2;
-
-
-//localfileupload -> handler function
-// const File = require('../models/File'); // Ensure you import the correct model
 
 function isFileTypeSupported(type, supportedTypes) {
     return supportedTypes.includes(type);
@@ -114,31 +131,28 @@ async function uploadFileToCloudinary(file, folder, quality) {
 // Image upload handler
 exports.imageUpload = async (req, res) => {
     try {
-        // Data fetch
+        // Extracting data from the request body
         const { crop, croptype, email, harvestdate, season, state, pricePerKg, quantity, soiltype, region, description } = req.body;
-        console.log(crop, croptype, email, harvestdate, season, state, pricePerKg, quantity, soiltype, region, description);
 
-        const file = req.files.imageFile; // Assuming the image file is being uploaded under this key
-        console.log(file);
-
-        // Validation
-        const supportedTypes = ["jpg", "jpeg", "png"];
-        const fileType = file.name.split('.').pop().toLowerCase(); // Using pop() for better clarity
-        console.log("File Type:", fileType);
-
-        if (!isFileTypeSupported(fileType, supportedTypes)) {
-            return res.status(400).json({
-                success: false,
-                message: 'File format not supported',
-            });
+        // Check if imageFile exists in the request
+        if (!req.files || !req.files.imageFile) {
+            return res.status(400).json({ success: false, message: 'Image file is required' });
         }
 
-        // File format supported
-        console.log("Uploading to Cloudinary");
-        const response = await uploadFileToCloudinary(file, "krishisahyog");
-        console.log(response);
+        const file = req.files.imageFile;
 
-        // Save to database according to the crop schema
+        // Validation for supported file types
+        const supportedTypes = ["jpg", "jpeg", "png"];
+        const fileType = file.name.split('.').pop().toLowerCase();
+
+        if (!isFileTypeSupported(fileType, supportedTypes)) {
+            return res.status(400).json({ success: false, message: 'File format not supported' });
+        }
+
+        // Upload to Cloudinary
+        const response = await uploadFileToCloudinary(file, "krishisahyog");
+        
+        // Save to the database
         const cropData = await Crop.create({
             crop,
             croptype,
@@ -151,29 +165,57 @@ exports.imageUpload = async (req, res) => {
             soiltype,
             region,
             description,
-            cropimage1: response.secure_url,
-            // cropimage2: response.secure_url,
-            // cropimage3: response.secure_url, // Assuming you're saving the first image here
-
-            
-            // Assuming you're saving the first image here
-             // Assuming you're saving the first image here
-            // Add more crop images as needed (e.g., cropimage2, cropimage3)
+            cropimage1: response.secure_url // Save the image URL
         });
 
-        res.json({
+        res.status(201).json({
             success: true,
             cropData,
             message: 'Crop details successfully uploaded',
         });
     } catch (error) {
         console.error(error);
-        res.status(400).json({
+        res.status(500).json({ success: false, message: 'Something went wrong' });
+    }
+};
+
+// const jwt = require('jsonwebtoken'); // Assuming you're using JWT for authentication
+
+const jwt = require('jsonwebtoken'); // Ensure this is imported at the top of your file
+
+exports.getCropsForFarmer = async (req, res) => {
+    try {
+        // Check for the token in the Authorization header
+        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+
+        if (!token) {
+            return res.status(403).json({ message: "No token provided, authorization denied" });
+        }
+
+        // Verify the token
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET); // Replace with your JWT secret
+        const farmerId = decodedToken.id; // Ensure the token has the correct payload structure
+
+        // Find crops added by this farmer
+        const crops = await Crop.find({ farmer: farmerId });
+
+        if (!crops || crops.length === 0) {
+            return res.status(404).json({ message: "No crops found for this farmer" });
+        }
+
+        // Return the crops found
+        res.status(200).json(crops);
+    } catch (error) {
+        console.error("Error fetching crops:", error); // Log error for debugging
+        res.status(500).json({
             success: false,
-            message: 'Something went wrong',
+            message: "Internal server error",
+            error: error.message,
         });
     }
-}
+};
+
+
 
 // Image size reducer
 exports.imageSizeReducer = async (req, res) => {

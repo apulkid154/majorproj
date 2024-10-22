@@ -1,17 +1,67 @@
+;
+
+
+
+
 import React, { useState } from 'react';
 import { Toaster } from 'react-hot-toast'; // Ensure you have this package installed
 import NavigationBar from './NavigationBar'; // Adjust this import based on your file structure
+import axios from 'axios'; // Import axios here
+// import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+    import toast from 'react-hot-toast'; // Assuming you're using react-hot-toast
 
 const Login = () => {
+
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [selectedRole, setSelectedRole] = useState('farmer'); // Default role
     const [loginChk, setLoginChk] = useState(0); // Assuming this tracks failed attempts
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        // Implement your login logic here, e.g., calling the backend API
-    };
+   const handleLogin = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!email || !password) {
+        toast.error('Please enter both email and password');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`http://localhost:3000/api/${selectedRole}/login`, {
+            email,
+            password,
+            role: selectedRole, // Include role in the request body
+        }, { withCredentials: true }); // Include credentials for cookie-based auth
+
+        console.log('Email:', email, 'Password:', password, 'Role:', selectedRole);
+
+        if (response.data.success) {
+            // Successful login
+            toast.success('Login successful!');
+
+            // Store the JWT token in localStorage
+            localStorage.setItem('token', response.data.token); // Assuming token is in response.data.token
+
+            // Redirect based on role
+            if (selectedRole === 'farmer') {
+                window.location.href = '/farmer/all-crops'; // Redirect farmer to All Crops page
+            } else if (selectedRole === 'buyer') {
+                window.location.href = '/buyer/crop-list'; // Redirect buyer to crop list
+            } else if (selectedRole === 'admin') {
+                window.location.href = '/admin/dashboard'; // Redirect admin to dashboard
+            }
+        } else {
+            // Login failed
+            toast.error('Invalid credentials, please try again.');
+        }
+    } catch (error) {
+        // Handle error (e.g., network error, server error)
+        console.error('Login error:', error);
+        toast.error('Something went wrong. Please try again later.');
+    }
+};
+
 
     return (
         <>

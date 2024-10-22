@@ -37,8 +37,8 @@ const Allcrops = () => {
                                 <div className="relative">
                                     {crop.cropimage1 ? (
                                         <img
-                                            src={`data:${crop.cropimage1.contentType};base64,${crop.cropimage1.data}`}
-                                            alt={crop.cropname}
+                                            src={crop.cropimage1} // Directly using the Cloudinary URL
+                                            alt={crop.crop}
                                             className="w-full h-48 object-cover"
                                         />
                                     ) : (
@@ -50,7 +50,7 @@ const Allcrops = () => {
                                 <div className="p-4">
                                     <h3 className="text-xl font-bold mb-2">{crop.crop}</h3>
                                     <p className="text-gray-600">Type: {crop.croptype}</p>
-                                    <p className="text-gray-600">Price per kg: ₹{crop.basePrice}</p>
+                                    <p className="text-gray-600">Price per kg: ₹{crop.pricePerKg}</p>
                                     {/* <p className="text-gray-600">Weight: {crop.weight} kg</p> */}
                                     <p className="text-gray-600">Region: {crop.region}</p>
                                     <p className="text-gray-600">State: {crop.state}</p>

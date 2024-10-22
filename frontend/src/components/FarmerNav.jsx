@@ -21,6 +21,10 @@ const FarmerNav = () => {
                     <li>
                         <Link to="/farmer/bidder-list" className="text-white hover:text-gray-300">Bidder List</Link>
                     </li>
+                    <li>
+                        <Link to="/farmer/cart" className="text-white hover:text-gray-300">My Cart</Link>
+
+                    </li>
                 </ul>
             </div>
         </nav>

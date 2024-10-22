@@ -18,7 +18,7 @@ const AddCropForm = () => {
     soiltype: '',
     region: '',
     description: '',
-    cropimage1: '',
+    imageFile: '',
     isAuction: false,
     basePrice: '',
     startDate: '',
@@ -245,8 +245,8 @@ const AddCropForm = () => {
   </label>
   <input
     type="file"
-    name="cropimage1"
-    onChange={(e) => setCropData({ ...cropData, cropimage1: e.target.files[0] })}
+    name="imageFile"
+    onChange={(e) => setCropData({ ...cropData, imageFile: e.target.files[0] })}
     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
     accept="image/*"  // Restrict file types to images only
   />
