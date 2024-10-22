@@ -29,7 +29,6 @@
     "web-vitals": "^4.2.3"
   },
   "devDependencies": {
-    "eslint": "^8.35.0",
     "eslint-plugin-react": "^7.31.8"
   },
   "browserslist": {
