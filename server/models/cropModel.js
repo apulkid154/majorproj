@@ -80,7 +80,7 @@ const cropSchema = new mongoose.Schema({
     farmer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Farmer',  // Reference to the Farmer model
-        required: true  // Farmer is required for each crop
+        // required: true  // Farmer is required for each crop
     }
 
 });
