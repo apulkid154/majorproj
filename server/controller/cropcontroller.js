@@ -1,5 +1,7 @@
 const Crop = require('../models/cropModel');
 const cloudinary = require("cloudinary").v2;
+const jwt = require('jsonwebtoken'); // Ensure this is imported at the top of your file
+
 
 exports.createCrop = async (req, res) => {
     try {
@@ -18,12 +20,22 @@ exports.createCrop = async (req, res) => {
             return res.status(400).json({ success: false, message: 'File format not supported' });
         }
 
+        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(403).json({ message: "No token provided, authorization denied" });
+        }
+
+        // Verify token and extract farmer ID
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const farmerId = decodedToken.id;
+
         // Upload to Cloudinary
         const response = await uploadFileToCloudinary(file, "krishisahyog");
 
         // Add all details from req.body to the database
         const crop = await Crop.create({
             ...req.body,
+             farmer: farmerId,
             cropimage1: response.secure_url // Save the image URL
         });
 
@@ -132,6 +144,14 @@ async function uploadFileToCloudinary(file, folder, quality) {
 exports.imageUpload = async (req, res) => {
     try {
         // Extracting data from the request body
+        const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
+        if (!token) {
+            return res.status(403).json({ message: "No token provided, authorization denied" });
+        }
+
+        // Verify token and extract farmer ID
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const farmerId = decodedToken.id;
         const { crop, croptype, email, harvestdate, season, state, pricePerKg, quantity, soiltype, region, description } = req.body;
 
         // Check if imageFile exists in the request
@@ -165,6 +185,7 @@ exports.imageUpload = async (req, res) => {
             soiltype,
             region,
             description,
+            farmer: farmerId,
             cropimage1: response.secure_url // Save the image URL
         });
 
@@ -181,7 +202,6 @@ exports.imageUpload = async (req, res) => {
 
 // const jwt = require('jsonwebtoken'); // Assuming you're using JWT for authentication
 
-const jwt = require('jsonwebtoken'); // Ensure this is imported at the top of your file
 
 exports.getCropsForFarmer = async (req, res) => {
     try {

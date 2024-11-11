@@ -79,8 +79,12 @@ const cropSchema = new mongoose.Schema({
     },
     farmer: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Farmer',  // Reference to the Farmer model
+        ref: 'farmerModel' // Reference to the Farmer model
         // required: true  // Farmer is required for each crop
+    },
+    farmer_token:{
+        type:String,
+        ref: 'farmerModel'
     }
 
 });

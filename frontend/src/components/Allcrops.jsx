@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FarmerNav from './FarmerNav';
 import { useNavigate } from 'react-router-dom';
+import BuyerNav from './BuyerNav';
 import axios from 'axios';
 
 const Allcrops = () => {
@@ -20,6 +21,25 @@ const Allcrops = () => {
         fetchData();
     }, []);
 
+    const handleViewDetails = (cropId) => {
+        // Retrieve the user role from local storage
+        const user = JSON.parse(localStorage.getItem('user'));
+        const role = user?.role;
+
+        // Determine the navigation path based on the role
+        let path;
+        if (role === 'farmer') {
+            path = `/farmer/cropdetails/${cropId}`;
+        } else if (role === 'buyer') {
+            path = `/buyer/cropdetails/${cropId}`;
+        } else if (role === 'admin') {
+            path = `/admin/cropdetails/${cropId}`;
+        } else {
+            console.error('Unknown role');
+            return;
+        }
+        navigate(path);
+    };
 // const handleSelectCrop = (cropId) => {
 //         // Redirect to the CropDetails page
 //         navigate(`/farmer/cropdetails/${cropId}`);  // Redirects to the crop details route
@@ -27,7 +47,7 @@ const Allcrops = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 ">
-            <FarmerNav />
+            {/* <BuyerNav /> */}
             <div className="container mx-auto">
                 <h1 className="text-4xl font-bold text-center mb-6">All Crops</h1>
                 {crops.length > 0 ? (
@@ -58,7 +78,8 @@ const Allcrops = () => {
                                     <div className="flex justify-between items-center mt-4">
                                         <button
                                             className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                                            onClick={() => navigate(`/farmer/cropdetails/${crop._id}`)}  // Direct navigation here
+                                           onClick={() => handleViewDetails(crop._id)}  // Use the handleViewDetails function
+                                        
                                         >
                                             View Details
                                         </button>

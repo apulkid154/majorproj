@@ -1,6 +1,3 @@
-;
-
-
 
 
 import React, { useState } from 'react';
@@ -41,13 +38,16 @@ const Login = () => {
             toast.success('Login successful!');
 
             // Store the JWT token in localStorage
-            localStorage.setItem('token', response.data.token); // Assuming token is in response.data.token
+            localStorage.setItem('token', response.data.token); 
+            localStorage.setItem('user', JSON.stringify({ email, role: selectedRole }));
+            // newFarmer.famer_token = famer_token;
+            // Assuming token is in response.data.token
 
             // Redirect based on role
             if (selectedRole === 'farmer') {
                 window.location.href = '/farmer/all-crops'; // Redirect farmer to All Crops page
             } else if (selectedRole === 'buyer') {
-                window.location.href = '/buyer/crop-list'; // Redirect buyer to crop list
+                window.location.href = '/buyer/all-crops'; // Redirect buyer to crop list
             } else if (selectedRole === 'admin') {
                 window.location.href = '/admin/dashboard'; // Redirect admin to dashboard
             }

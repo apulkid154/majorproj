@@ -26,7 +26,7 @@ const Registration = () => {
         farmingExperience: '',
         farmingPracticesDescription: '',
         State: '',
-        Region: '',
+        Region:'',
         role: 'farmer', // Assuming default role is farmer
     });
     const [buyerFormData, setBuyerFormData] = useState({

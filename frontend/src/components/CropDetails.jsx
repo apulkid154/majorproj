@@ -13,6 +13,8 @@ const CropDetails = () => {
     const [loading, setLoading] = useState(true);
     const [selectedQuantity, setSelectedQuantity] = useState(1); // New state for quantity
       const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem('user'));
+      const role = user?.role;
 
     useEffect(() => {
         const fetchCropDetails = async () => {
@@ -33,7 +35,7 @@ const CropDetails = () => {
     if (selectedQuantity > 0) {
         addToCart(crop, selectedQuantity); // Pass both crop and quantity separately
         alert(`${crop.crop} (Quantity: ${selectedQuantity}) has been added to your cart!`);
-        navigate('/farmer/cart');
+        navigate('/buyer/all-crops');
     } else {
         alert('Please select a valid quantity.');
     }
@@ -121,12 +123,14 @@ const CropDetails = () => {
                         </button>
                     </div>
 
-                    <button
-                        onClick={handleAddToCart}
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                    >
-                        Add to Cart
-                    </button>
+                    {role === 'buyer' && (
+                        <button
+                            onClick={handleAddToCart}
+                            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                        >
+                            Add to Cart
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

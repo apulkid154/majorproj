@@ -69,6 +69,10 @@ const farmerSchema = new mongoose.Schema({
         required: true,
         default: "farmer", // Default role is 'farmer'
         enum: ["farmer", "buyer", "admin"] // You can extend this list if needed
+    },
+    farmer_token:{
+        type:String,
+
     }
 });
 

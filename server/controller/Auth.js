@@ -161,6 +161,12 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
 
+    // If the role is farmer, store the token in the farmer's document
+    if (role === "farmer") {
+      user.famer_token = token; // Assuming your farmer model has a 'famer_token' field
+      await user.save(); // Save the updated farmer model with the token
+    }
+
     // Remove password from user object before sending response
     const userResponse = user.toObject();
     userResponse.password = undefined;

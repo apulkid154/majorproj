@@ -30,7 +30,7 @@ const BidderList = () => {
 
   return (
     <div>
-      <FarmerNav />
+      {/* <FarmerNav /> */}
       <div className="container mx-auto py-8">
         <h1 className="text-3xl font-bold mb-4">Bidder List</h1>
         <table className="min-w-full divide-y divide-gray-200">

@@ -38,35 +38,49 @@ const AddCropForm = () => {
     setCropData(initialCropData);
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Create a FormData object to send the data
+    console.log('Form data before submission:', cropData);
+
+    // Get the logged-in user's token (adjust according to your token storage method)
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found. Please log in first.');
+      toast.error('You need to be logged in to add a crop.');
+      return;
+    }
+
+    // Create FormData to handle file uploads
     const formData = new FormData();
     for (const key in cropData) {
-      formData.append(key, cropData[key]);
+      if (cropData[key]) {
+        formData.append(key, cropData[key]);
+      }
     }
+
+    console.log('Form data appended to FormData:', formData);
 
     try {
       const response = await axios.post('http://localhost:3000/api/crop/createcrop', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`, // Send the token in the Authorization header
         },
       });
+
       console.log('Crop data submitted successfully:', response.data);
-       toast.success('Crop added successfully!');
-       resetForm();
-      // You can handle success response here (e.g., show a success message, reset the form)
+      toast.success('Crop added successfully!');
+      resetForm();
     } catch (error) {
       console.error('Error submitting crop data:', error);
       toast.error('Error submitting crop data.');
-      // You can handle error response here (e.g., show an error message)
     }
   };
 
+
   return (
     <>
-    <FarmerNav /> 
+    {/* <FarmerNav />  */}
        <div className="max-w-4xl mx-auto mt-8 p-6 bg-gray-100 shadow-lg rounded-lg">
         <form
     

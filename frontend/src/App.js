@@ -20,33 +20,44 @@ import { CartProvider } from './components/CartContext';
 const App = () => {
   return (
     <CartProvider>
-         <Router>
-      <div>
-        {/* <NavigationBar /> */}
-        <Routes>
-          <Route path="/" element={<Homepage />} />
-          <Route path="/registration" element={<Registration />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/feedback" element={<Feedback />} />
-          <Route path="/cropform" element={<CropForm />} />
-          {/* <Route path="/farmer/*" element={<FarmerNav />}/> */}
-            <Route path="/farmer/all-crops" element={<Allcrops />} />
-            <Route path="/farmer/add-crop" element={<CropForm />} />
-            <Route path="/farmer/my-crop-list" element={<MyCropList />} />
-            {/* <Route path='/marketplace' element={<Marketplace/>} /> */}
-            <Route path="/farmer/bidder-list" element={<BidderList />} />
-          <Route path="/farmer/cropdetails/:cropId" element={<CropDetails />} />
-          <Route path="farmer/cart" element={<CartPage />} />
+      <Router>
+        <div>
+          {/* <NavigationBar /> */}
 
+          <Routes>
+            {/* General Routes */}
+            <Route path="/" element={<Homepage />} />
+            <Route path="/registration" element={<Registration />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/feedback" element={<Feedback />} />
+            <Route path="/cropform" element={<CropForm />} />
+            
+            {/* Farmer Routes */}
+            <Route path="/farmer" element={<FarmerNav />}>
+              <Route path="all-crops" element={<Allcrops />} />
+              <Route path="add-crop" element={<CropForm />} />
+              <Route path="my-crop-list" element={<MyCropList />} />
+              <Route path="bidder-list" element={<BidderList />} />
+              <Route path="cropdetails/:cropId" element={<CropDetails />} />
+              <Route path="cart" element={<CartPage />} />
+            </Route>
 
-          <Route path="/buyer" element={<BuyerNav />} />
-          <Route path="/admin" element={<AdminNav />} />
-        </Routes>
-      </div>
-    </Router>
+            {/* Buyer Routes */}
+            <Route path="/buyer" element={<BuyerNav />}>
+              <Route path="all-crops" element={<Allcrops />} />
+              <Route path="cropdetails/:cropId" element={<CropDetails />} />
+              <Route path="cart" element={<CartPage />}/>
+            </Route>
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminNav />}>
+             
+            </Route>
+          </Routes>
+        </div>
+      </Router>
     </CartProvider>
-   
   );
-}
+};
 
 export default App;

@@ -1,4 +1,3 @@
-// MyCrops.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
@@ -7,9 +6,9 @@ const MyCropList = () => {
     const [myCrops, setMyCrops] = useState([]);
     const [editingCrop, setEditingCrop] = useState(null);
     const [editData, setEditData] = useState({ cropName: '', cropType: '', pricePerKg: '', quantity: '' });
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true);
 
-    // Fetch crops added by the logged-in user
+    // Fetch crops added by the logged-in farmer
     useEffect(() => {
         const fetchMyCrops = async () => {
             try {
@@ -21,14 +20,14 @@ const MyCropList = () => {
 
                 const response = await axios.get('http://localhost:3000/api/crop/mycrops', {
                     headers: {
-                        Authorization: `Bearer ${token}`, // Use token for authentication
+                        Authorization: `Bearer ${token}`,
                     }
                 });
                 setMyCrops(response.data);
             } catch (error) {
                 toast.error('Failed to load your crops');
             } finally {
-                setLoading(false); // Always set loading to false after request
+                setLoading(false);
             }
         };
 
@@ -44,7 +43,7 @@ const MyCropList = () => {
                 return;
             }
 
-            await axios.delete(`/api/crops/delete/${cropId}`, {
+            await axios.delete(`http://localhost:3000/api/crop/delete/${cropId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -70,7 +69,7 @@ const MyCropList = () => {
                 return;
             }
 
-            await axios.put(`/api/crops/edit/${cropId}`, editData, {
+            await axios.put(`http://localhost:3000/api/crop/edit/${cropId}`, editData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 }
@@ -79,7 +78,7 @@ const MyCropList = () => {
                 crop._id === cropId ? { ...crop, ...editData } : crop
             );
             setMyCrops(updatedCrops);
-            setEditingCrop(null); // Exit edit mode
+            setEditingCrop(null);
             toast.success('Crop updated successfully');
         } catch (error) {
             toast.error('Failed to update the crop');
@@ -92,76 +91,93 @@ const MyCropList = () => {
         setEditData({ ...editData, [name]: value });
     };
 
-    // Render the crop list
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-3xl font-bold mb-6">My Crops List</h1>
+        <div className="container mx-auto p-6">
+            <h1 className="text-3xl font-bold mb-6 text-center">My Crops List</h1>
 
-            {loading ? ( // Show loading message if crops are being fetched
+            {loading ? (
                 <p>Loading crops...</p>
             ) : myCrops.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-4">
                     {myCrops.map((crop) => (
-                        <div key={crop._id} className="bg-white shadow-lg rounded-lg p-4">
-                            {editingCrop === crop._id ? (
-                                // Editing Mode UI
-                                <div>
-                                    <input
-                                        type="text"
-                                        name="cropName"
-                                        value={editData.cropName}
-                                        onChange={handleInputChange}
-                                        placeholder="Crop Name"
-                                        className="block w-full p-2 mb-2 border border-gray-300 rounded"
+                        <div key={crop._id} className="bg-white p-5 shadow-md rounded-lg flex justify-between items-center transition-transform transform hover:scale-105">
+                            {/* Crop Image */}
+                            <div className="w-1/6">
+                                {crop.cropimage1 ? (
+                                    <img
+                                        src={crop.cropimage1}
+                                        alt={crop.cropName}
+                                        className="w-full h-24 object-cover rounded-md"
                                     />
-                                    <input
-                                        type="text"
-                                        name="cropType"
-                                        value={editData.cropType}
-                                        onChange={handleInputChange}
-                                        placeholder="Crop Type"
-                                        className="block w-full p-2 mb-2 border border-gray-300 rounded"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="pricePerKg"
-                                        value={editData.pricePerKg}
-                                        onChange={handleInputChange}
-                                        placeholder="Price per kg"
-                                        className="block w-full p-2 mb-2 border border-gray-300 rounded"
-                                    />
-                                    <input
-                                        type="number"
-                                        name="quantity"
-                                        value={editData.quantity}
-                                        onChange={handleInputChange}
-                                        placeholder="Quantity (kg)"
-                                        className="block w-full p-2 mb-2 border border-gray-300 rounded"
-                                    />
-                                    <div className="flex space-x-2">
-                                        <button
-                                            onClick={() => handleEditSubmit(crop._id)}
-                                            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                                        >
-                                            Save
-                                        </button>
-                                        <button
-                                            onClick={() => setEditingCrop(null)}
-                                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                                        >
-                                            Cancel
-                                        </button>
+                                ) : (
+                                    <div className="w-full h-24 bg-gray-200 flex items-center justify-center text-gray-500 rounded-md">
+                                        No Image
                                     </div>
-                                </div>
-                            ) : (
-                                // Viewing Mode UI
-                                <div>
-                                    <h2 className="text-xl font-semibold">{crop.cropName}</h2>
-                                    <p>Type: {crop.cropType}</p>
-                                    <p>Price per kg: ₹{crop.pricePerKg}</p>
-                                    <p>Quantity: {crop.quantity} kg</p>
-                                    <div className="flex justify-between mt-4">
-                                        <button
+                                )}
+                            </div>
+
+                            {/* Crop Details */}
+                            <div className="w-2/6 pl-4">
+                                <h2 className="text-xl font-bold">{crop.cropName}</h2>
+                                <p className="text-gray-700">Type: {crop.cropType}</p>
+                                <p className="text-gray-700">Price per kg: ₹{crop.pricePerKg}</p>
+                                <p className="text-gray-700">Quantity: {crop.quantity} kg</p>
+                            </div>
+
+                            {/* Edit/Delete Buttons */}
+                            <div className="w-1/6 flex justify-between items-center">
+                                {editingCrop === crop._id ? (
+                                    <div>
+                                        <input
+                                            type="text"
+                                            name="cropName"
+                                            value={editData.cropName}
+                                            onChange={handleInputChange}
+                                            placeholder="Crop Name"
+                                            className="block w-full p-2 mb-2 border border-gray-300 rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            name="cropType"
+                                            value={editData.cropType}
+                                            onChange={handleInputChange}
+                                            placeholder="Crop Type"
+                                            className="block w-full p-2 mb-2 border border-gray-300 rounded"
+                                        />
+                                        <input
+                                            type="number"
+                                            name="pricePerKg"
+                                            value={editData.pricePerKg}
+                                            onChange={handleInputChange}
+                                            placeholder="Price per kg"
+                                            className="block w-full p-2 mb-2 border border-gray-300 rounded"
+                                        />
+                                        <input
+                                            type="number"
+                                            name="quantity"
+                                            value={editData.quantity}
+                                            onChange={handleInputChange}
+                                            placeholder="Quantity (kg)"
+                                            className="block w-full p-2 mb-2 border border-gray-300 rounded"
+                                        />
+                                        <div className="flex space-x-2 mt-2">
+                                            <button
+                                                onClick={() => handleEditSubmit(crop._id)}
+                                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingCrop(null)}
+                                                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex space-x-2">
+                                        {/* <button
                                             onClick={() => {
                                                 setEditingCrop(crop._id);
                                                 setEditData({
@@ -171,24 +187,24 @@ const MyCropList = () => {
                                                     quantity: crop.quantity,
                                                 });
                                             }}
-                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                                            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
                                         >
                                             Edit
                                         </button>
                                         <button
                                             onClick={() => deleteCrop(crop._id)}
-                                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                            className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                                         >
                                             Delete
-                                        </button>
+                                        </button> */}
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-600">You haven't added any crops yet.</p>
+                <p className="text-gray-600 text-center">You haven't added any crops yet.</p>
             )}
         </div>
     );

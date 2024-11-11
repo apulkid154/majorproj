@@ -1,11 +1,19 @@
-// CartContext.js
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState([]);
+    // Load cart from localStorage or initialize as empty array
+    const [cart, setCart] = useState(() => {
+        const savedCart = localStorage.getItem('cart');
+        return savedCart ? JSON.parse(savedCart) : [];
+    });
+
+    // Update localStorage whenever the cart changes
+    useEffect(() => {
+        localStorage.setItem('cart', JSON.stringify(cart));
+    }, [cart]);
 
     const addToCart = (crop, quantity) => {
         const existingCrop = cart.find(item => item._id === crop._id);

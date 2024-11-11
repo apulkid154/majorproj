@@ -4,6 +4,11 @@ import { useCart } from './CartContext';
 const CartPage = () => {
     const { cart, removeFromCart } = useCart();
 
+    // Calculate the grand total
+    const grandTotal = cart.reduce((total, item) => {
+        return total + (item.pricePerKg * item.quantity);
+    }, 0);
+
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-3xl font-bold mb-6 text-center">Your Cart</h1>
@@ -58,7 +63,16 @@ const CartPage = () => {
             ) : (
                 <p className="text-gray-600 text-center">Your cart is empty</p>
             )}
-            
+
+            {/* Grand Total */}
+            {cart.length > 0 && (
+                <div className="mt-6 flex justify-between items-center font-bold text-xl  text-gray-800">
+                    <p>Grand Total:</p>
+                    <p className="text-green-600">₹{grandTotal.toFixed(2)}</p>
+                </div>
+            )}
+
+            {/* Proceed to Payment Button */}
             <div className="mt-8 flex justify-center">
                 <button
                     className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition duration-200 shadow-lg"

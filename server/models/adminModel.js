@@ -28,6 +28,10 @@ const adminSchema = new mongoose.Schema({
         required: true,
         // default: "farmer", // Default role is 'farmer'
         enum: ["farmer", "buyer", "admin"] // You can extend this list if needed
+    },
+    admin_token:{
+        type:String,
+
     }
    
 });
