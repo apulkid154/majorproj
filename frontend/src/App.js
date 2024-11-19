@@ -15,15 +15,16 @@ import MyCropList from './components/MyCropList';
 import CropDetails from './components/CropDetails';
 import CartPage from './components/CartPage';
 import { CartProvider } from './components/CartContext';
-// import Marketplace from './components/Marketplace';
+import AdminDashboard from './components/AdminDashboard';
+import 'leaflet/dist/leaflet.css'; // Import Leaflet styles
+import ManageCrops from './components/ManageCrops';
+
 
 const App = () => {
   return (
     <CartProvider>
       <Router>
         <div>
-          {/* <NavigationBar /> */}
-
           <Routes>
             {/* General Routes */}
             <Route path="/" element={<Homepage />} />
@@ -46,13 +47,16 @@ const App = () => {
             <Route path="/buyer" element={<BuyerNav />}>
               <Route path="all-crops" element={<Allcrops />} />
               <Route path="cropdetails/:cropId" element={<CropDetails />} />
-              <Route path="cart" element={<CartPage />}/>
+              <Route path="cart" element={<CartPage />} />
             </Route>
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminNav />}>
-             
+              <Route path="dashboard" element={<AdminDashboard/>} />
+              <Route path="manage-crops" element={<ManageCrops/>} />
+
             </Route>
+
           </Routes>
         </div>
       </Router>

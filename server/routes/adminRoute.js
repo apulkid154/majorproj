@@ -1,31 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const adminController = require('../controller/admincontroller'); // Corrected path
-const Buyer = require('../models/buyerModel'); // Import the Buyer model
-const {login,signup}=require("../controller/Auth");
+const adminController = require('../controller/admincontroller');
+const { login, signup } = require("../controller/Auth");
 const { auth, isFarmer, isBuyer, isAdmin } = require("../middleware/auth");
 
-// Route to create a new admin
-router.post('/createadmin', adminController.createAdmin);
 
-// Route to get all admins
-// router.get('/admindata', adminController.getAllAdmins);
 
-// Route to get admin by ID
-router.get('/admin/:id', adminController.getAdminById);
+// Define routes and link them to controller functions
+router.get('/farmers', adminController.getAllFarmers);
+router.get('/crops', adminController.getAllCrops);
+router.delete('/delete-crop/:cropId', adminController.deleteCrop);
+router.put('/crop/:cropId', adminController.updateCrop);
+router.get('/admin-stats', adminController.getAdminStats);
+router.get('/crop/:cropId/bids', adminController.getBidsForCrop);
+router.delete('/bid/:bidId', adminController.deleteBid);
+// / Login route (Public access)
+router.post('/login', login);
 
-// Route to update an admin
-router.put('/updateadmin/:id', adminController.updateAdmin);
+// Signup route (Public access)
+router.post('/signup', signup);
 
-// Route to delete an admin
-router.delete('/deleteadmin/:id', adminController.deleteAdmin);
 
-// Routes for blocking/unblocking buyers
-router.post('/admin/:adminId/block/buyer/:buyerId', adminController.blockBidder);
-router.post('/admin/:adminId/unblock/buyer/:buyerId', adminController.unblockBidder);
-router.post('/login',login);
-router.post('/signup',signup);
-router.get("/admin/dashboard", auth, isAdmin, (req, res) => {
-  res.status(200).json({ success: true, message: "Welcome Admin!" });
-});
 module.exports = router;

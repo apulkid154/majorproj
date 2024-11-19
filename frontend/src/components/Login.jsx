@@ -1,67 +1,61 @@
-
-
 import React, { useState } from 'react';
 import { Toaster } from 'react-hot-toast'; // Ensure you have this package installed
 import NavigationBar from './NavigationBar'; // Adjust this import based on your file structure
 import axios from 'axios'; // Import axios here
-// import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
-    import toast from 'react-hot-toast'; // Assuming you're using react-hot-toast
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for redirection
+import toast from 'react-hot-toast'; // Assuming you're using react-hot-toast
 
 const Login = () => {
-
-
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [selectedRole, setSelectedRole] = useState('farmer'); // Default role
     const [loginChk, setLoginChk] = useState(0); // Assuming this tracks failed attempts
 
-   const handleLogin = async (e) => {
-    e.preventDefault();
+    const navigate = useNavigate(); // Use the hook at the top of the component
 
-    // Basic validation
-    if (!email || !password) {
-        toast.error('Please enter both email and password');
-        return;
-    }
+    const handleLogin = async (e) => {
+        e.preventDefault();
 
-    try {
-        const response = await axios.post(`http://localhost:3000/api/${selectedRole}/login`, {
-            email,
-            password,
-            role: selectedRole, // Include role in the request body
-        }, { withCredentials: true }); // Include credentials for cookie-based auth
-
-        console.log('Email:', email, 'Password:', password, 'Role:', selectedRole);
-
-        if (response.data.success) {
-            // Successful login
-            toast.success('Login successful!');
-
-            // Store the JWT token in localStorage
-            localStorage.setItem('token', response.data.token); 
-            localStorage.setItem('user', JSON.stringify({ email, role: selectedRole }));
-            // newFarmer.famer_token = famer_token;
-            // Assuming token is in response.data.token
-
-            // Redirect based on role
-            if (selectedRole === 'farmer') {
-                window.location.href = '/farmer/all-crops'; // Redirect farmer to All Crops page
-            } else if (selectedRole === 'buyer') {
-                window.location.href = '/buyer/all-crops'; // Redirect buyer to crop list
-            } else if (selectedRole === 'admin') {
-                window.location.href = '/admin/dashboard'; // Redirect admin to dashboard
-            }
-        } else {
-            // Login failed
-            toast.error('Invalid credentials, please try again.');
+        // Basic validation
+        if (!email || !password) {
+            toast.error('Please enter both email and password');
+            return;
         }
-    } catch (error) {
-        // Handle error (e.g., network error, server error)
-        console.error('Login error:', error);
-        toast.error('Something went wrong. Please try again later.');
-    }
-};
 
+        try {
+            console.log("Selected Role:", selectedRole);
+
+            const response = await axios.post(`http://localhost:3000/api/${selectedRole}/login`, {
+                email,
+                password,
+                role: selectedRole, // Include role in the request body
+            }, { withCredentials: true }); // Include credentials for cookie-based auth
+
+            // console.log('Email:', email, 'Password:', password, 'Role:', selectedRole);
+
+            if (response.data.success) {
+                toast.success('Login successful!');
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify({ email, role: selectedRole }));
+
+                // Redirect based on role
+                if (selectedRole === 'farmer') {
+                    navigate('/farmer/all-crops');
+                } else if (selectedRole === 'buyer') {
+                    navigate('/buyer/all-crops');
+                } else if (selectedRole === 'admin') {
+                    navigate('/admin/dashboard');
+                }
+            } else {
+                // Login failed
+                toast.error('Invalid credentials, please try again.');
+            }
+        } catch (error) {
+            // Handle error (e.g., network error, server error)
+            console.error('Login error:', error);
+            toast.error('Something went wrong. Please try again later.');
+        }
+    };
 
     return (
         <>

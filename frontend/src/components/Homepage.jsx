@@ -1,6 +1,7 @@
 import React from "react";
 import NavigationBar from "./NavigationBar";
-import { Carousel } from "@material-tailwind/react";
+// import { Carousel } from "@material-tailwind/react";
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Homepage = () => {
   return (
