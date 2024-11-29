@@ -13,49 +13,66 @@ const Login = () => {
 
     const navigate = useNavigate(); // Use the hook at the top of the component
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
+const handleLogin = async (e) => {
+    e.preventDefault();
 
-        // Basic validation
-        if (!email || !password) {
-            toast.error('Please enter both email and password');
-            return;
-        }
+    // Basic validation
+    if (!email || !password) {
+        toast.error('Please enter both email and password');
+        return;
+    }
 
-        try {
-            console.log("Selected Role:", selectedRole);
+    try {
+        console.log("Selected Role:", selectedRole);
 
-            const response = await axios.post(`http://localhost:3000/api/${selectedRole}/login`, {
-                email,
-                password,
-                role: selectedRole, // Include role in the request body
-            }, { withCredentials: true }); // Include credentials for cookie-based auth
+        const response = await axios.post(`http://localhost:3000/api/${selectedRole}/login`, {
+            email,
+            password,
+            role: selectedRole, // Include role in the request body
+        }, { withCredentials: true }); // Include credentials for cookie-based auth
 
-            // console.log('Email:', email, 'Password:', password, 'Role:', selectedRole);
+        // Check if the login was successful
+        if (response.data.success) {
+            toast.success('Login successful!');
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('user', JSON.stringify({ email, role: selectedRole }));
 
-            if (response.data.success) {
-                toast.success('Login successful!');
-                localStorage.setItem('token', response.data.token);
-                localStorage.setItem('user', JSON.stringify({ email, role: selectedRole }));
-
-                // Redirect based on role
-                if (selectedRole === 'farmer') {
-                    navigate('/farmer/all-crops');
-                } else if (selectedRole === 'buyer') {
-                    navigate('/buyer/all-crops');
-                } else if (selectedRole === 'admin') {
-                    navigate('/admin/dashboard');
-                }
-            } else {
-                // Login failed
-                toast.error('Invalid credentials, please try again.');
+            // Redirect based on role
+            if (selectedRole === 'farmer') {
+                navigate('/farmer/all-crops');
+            } else if (selectedRole === 'buyer') {
+                navigate('/buyer/all-crops');
+            } else if (selectedRole === 'admin') {
+                navigate('/admin/dashboard');
             }
-        } catch (error) {
-            // Handle error (e.g., network error, server error)
-            console.error('Login error:', error);
+        } else {
+            // Generic fallback for failed login
+            toast.error('Login failed, please try again.');
+        }
+    } catch (error) {
+        // Handle specific error messages
+        if (error.response) {
+            // If the error has a response from the server
+            const errorMessage = error.response.data.error;
+            if (errorMessage === 'incorrect password') {
+                toast.error('Incorrect password, please try again.');
+            } else if (errorMessage === 'user_not_found') {
+                toast.error('User does not exist. Please check your email or sign up.');
+            } else {
+                toast.error('Login failed, please try again.');
+            }
+        } else if (error.request) {
+            // If there is no response from the server
+            toast.error('Network error. Please check your internet connection and try again.');
+        } else {
+            // If an unknown error occurs
+            console.error('Login error:', error.message);
             toast.error('Something went wrong. Please try again later.');
         }
-    };
+    }
+};
+
+
 
     return (
         <>

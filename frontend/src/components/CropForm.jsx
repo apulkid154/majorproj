@@ -26,6 +26,7 @@ const AddCropForm = () => {
     quantity: '',
   });
 
+  
   // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -35,7 +36,7 @@ const AddCropForm = () => {
     });
   };
   const resetForm = () => {
-    setCropData(initialCropData);
+    setCropData(CropData);
   };
 
  const handleSubmit = async (e) => {
@@ -364,3 +365,5 @@ const AddCropForm = () => {
 };
 
 export default AddCropForm;
+
+// while successful addition of crop both toast error and crop succesfully added areshown which is wrong 

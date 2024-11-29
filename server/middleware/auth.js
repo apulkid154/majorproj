@@ -1,6 +1,10 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const farmer = require("../models/farmerModel");
+const buyer = require("../models/buyerModel"); // Import your User model (adjust the path if needed)
+ // Import your User model (adjust the path if needed)
 
+// JWT Authentication Middleware
 exports.auth = (req, res, next) => {
   try {
     // Extract JWT token
@@ -54,3 +58,57 @@ const checkRole = (role) => (req, res, next) => {
 exports.isFarmer = checkRole('Farmer');
 exports.isBuyer = checkRole('Buyer');
 exports.isAdmin = checkRole('Admin');
+
+// Block/Unblock User Middleware
+exports.blockUser = async (req, res) => {
+  const { userId, userType } = req.body;
+
+  if (!userId || !userType) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: userId or userType.",
+    });
+  }
+
+  if (userType !== "farmer" && userType !== "buyer") {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid userType. Must be 'farmer' or 'buyer'.",
+    });
+  }
+
+  const Model = userType === "farmer" ? farmer : buyer;
+  const user = await Model.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: `${userType} not found.`,
+    });
+  }
+
+  try {
+    // Attempt to block/unblock the user
+    user.isBlocked = true;
+    await user.save({ validateModifiedOnly: true });
+
+    return res.status(200).json({
+      success: true,
+      message: `${userType} has been blocked successfully.`,
+    });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      // Specific validation error handling
+      return res.status(400).json({
+        success: false,
+        message: `Validation error: ${error.message}`,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "An unexpected error occurred.",
+        error: error.message,
+      });
+    }
+  }
+};

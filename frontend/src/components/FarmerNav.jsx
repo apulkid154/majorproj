@@ -61,6 +61,9 @@ const FarmerNav = () => {
                                 Logout
                             </button>
                         </li>
+                        <li>
+                            {/* <Link to="/farmer/chat" className="text-white hover:text-gray-300">Chat</Link> */}
+                        </li>
                     </ul>
                 </div>
             </nav>

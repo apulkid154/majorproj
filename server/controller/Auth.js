@@ -144,6 +144,14 @@ exports.login = async (req, res) => {
       });
     }
 
+    // Check if the user is blocked
+    if (user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account has been blocked. Please contact support.",
+      });
+    }
+
     // Compare the password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
@@ -194,3 +202,4 @@ exports.login = async (req, res) => {
     });
   }
 };
+

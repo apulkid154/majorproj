@@ -32,7 +32,8 @@ const buyerSchema = new mongoose.Schema({
     buyer_token:{
         type:String,
 
-    }
+    },
+    isBlocked: { type: Boolean, default: false }
 });
 
 // Create the Buyer model

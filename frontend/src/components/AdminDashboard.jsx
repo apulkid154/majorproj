@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Chart from 'react-apexcharts';
 import axios from 'axios';
-import { MapContainer, TileLayer, Marker, Popup,CircleMarker} from 'react-leaflet';
-import 'leaflet/dist/leaflet.css'; // Import Leaflet styles
-// import { Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const API_KEY = 'a51be103499149a3ae7e10f63a2cfea6'; // Replace with OpenCage API key
 
@@ -18,8 +17,9 @@ const AdminDashboard = () => {
         totalCrops: 0,
         totalSoldCrops: 0,
         totalBids: 0,
-        cropMaxBids: [],  
-        cropCategories: [] 
+        cropMaxBids: [],
+        cropCategories: [],
+        revenueData: [] // Placeholder for revenue data
     });
     const [isLoading, setIsLoading] = useState(true);
 
@@ -30,8 +30,6 @@ const AdminDashboard = () => {
                 
                 // Fetch admin stats data
                 const response = await axios.get('http://localhost:3000/api/admin/admin-stats');
-                
-                // Update dashboard data for general stats and cropMaxBids
                 if (response.data) {
                     setDashboardData(prevData => ({
                         ...prevData,
@@ -41,7 +39,8 @@ const AdminDashboard = () => {
                         totalCrops: response.data.totalCrops || 0,
                         totalSoldCrops: response.data.totalSoldCrops || 0,
                         totalBids: response.data.totalBids || 0,
-                        cropMaxBids: response.data.cropMaxBids || []
+                        cropMaxBids: response.data.cropMaxBids || [],
+                        revenueData: response.data.revenueData || [] // Update with fetched revenue data
                     }));
                 }
 
@@ -52,27 +51,23 @@ const AdminDashboard = () => {
 
                     // Geocode each crop location
                     const geocodedCrops = await Promise.all(
-                    crops.map(async (crop) => {
-                        console.log(`Processing crop: ${crop.crop}, region: ${crop.region}`); // Log each crop's name and region
-                        
-                        const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(crop.region)}&key=${API_KEY}`;
-                        try {
-                            const geocodeResponse = await axios.get(geocodeUrl);
-                            const { lat, lng } = geocodeResponse.data.results[0].geometry;
-                            console.log(`Geocoded location for ${crop.region}: ${lat}, ${lng}`); // Log geocoded latitude and longitude
-                            // console.log(`Failed to name: ${crop.farmer.name}`, err.message);
-
-                            return { ...crop, latitude: lat, longitude: lng };
-                        } catch (err) {
-                            console.error(`Failed to geocode location: ${crop.Region}`, err.message);
-
-                            return { ...crop, latitude: null, longitude: null };
-                        }
-                    })
-                );
+                        crops.map(async (crop) => {
+                            console.log(`Processing crop: ${crop.crop}, region: ${crop.region}`); // Log each crop's name and region
+                            
+                            const geocodeUrl = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(crop.region)}&key=${API_KEY}`;
+                            try {
+                                const geocodeResponse = await axios.get(geocodeUrl);
+                                const { lat, lng } = geocodeResponse.data.results[0].geometry;
+                                console.log(`Geocoded location for ${crop.region}: ${lat}, ${lng}`); // Log geocoded latitude and longitude
+                                return { ...crop, latitude: lat, longitude: lng };
+                            } catch (err) {
+                                console.error(`Failed to geocode location: ${crop.region}`, err.message);
+                                return { ...crop, latitude: null, longitude: null };
+                            }
+                        })
+                    );
 
                     setCropLocations(geocodedCrops);
-                    
 
                     // Process crop categories after fetching crops
                     const categoryCounts = crops.reduce((acc, crop) => {
@@ -104,6 +99,7 @@ const AdminDashboard = () => {
     const cropNames = (dashboardData.cropMaxBids || []).map(item => item.name);
     const maxBidValues = (dashboardData.cropMaxBids || []).map(item => item.maxBid);
 
+    // Bar Chart for Max Bids
     const cropMaxBidChartOptions = {
         chart: { type: 'bar', height: 350 },
         xaxis: {
@@ -130,12 +126,9 @@ const AdminDashboard = () => {
         }]
     };
 
-    const cropMaxBidChartSeries = [{
-        name: 'Max Bid',
-        data: maxBidValues
-    }];
+    const cropMaxBidChartSeries = [{ name: 'Max Bid', data: maxBidValues }];
 
-    // Extract data for Crop Categories Donut Chart
+    // Donut Chart for Crop Categories
     const cropCategoryLabels = dashboardData.cropCategories.map(category => category.category);
     const cropCategorySeries = dashboardData.cropCategories.map(category => parseFloat(category.percentage));
 
@@ -147,6 +140,23 @@ const AdminDashboard = () => {
             y: { formatter: (val) => `${val.toFixed(2)}%` }
         }
     };
+
+    // Line Chart for Revenue
+    const revenueChartOptions = {
+        chart: { type: 'line', height: 350 },
+        xaxis: {
+            categories: dashboardData.revenueData.map((data) => data.month),
+            title: { text: 'Month' }
+        },
+        yaxis: { title: { text: 'Revenue ($)' } },
+        title: { text: 'Monthly Revenue', align: 'center' },
+        tooltip: { y: { formatter: (val) => `$${val}` } }
+    };
+
+    const revenueChartSeries = [{
+        name: 'Revenue',
+        data: dashboardData.revenueData.map((data) => data.revenue)
+    }];
 
     if (isLoading) return <div>Loading...</div>;
 
@@ -165,13 +175,15 @@ const AdminDashboard = () => {
             </div>
 
             {/* Charts section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <div className="bg-white shadow-lg rounded-lg p-6">
                     <Chart options={cropMaxBidChartOptions} series={cropMaxBidChartSeries} type="bar" height={350} />
                 </div>
-                {/* Crop Categories Donut Chart */}
                 <div className="bg-white shadow-lg rounded-lg p-6">
                     <Chart options={donutChartOptions} series={cropCategorySeries} type="donut" height={350} />
+                </div>
+                <div className="bg-white shadow-lg rounded-lg p-6">
+                    <Chart options={revenueChartOptions} series={revenueChartSeries} type="line" height={350} />
                 </div>
             </div>
 
@@ -192,9 +204,8 @@ const AdminDashboard = () => {
                                 weight={1}
                             >
                                 <Popup>
-                                    <strong>Crop:</strong> {crop.crop} <br />
-                                    <strong>Location:</strong> {crop.region}<br/>
-                                    {/* <strong>Farmer:</strong>{crop.farmerName} */}
+                                    <strong>Crop:</strong> {crop.crop}<br />
+                                    <strong>Region:</strong> {crop.region}
                                 </Popup>
                             </CircleMarker>
                         )

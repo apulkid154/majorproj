@@ -9,7 +9,7 @@ router.get('/bids', bidderController.getAllBids);
 router.get('/bids/:cropId', bidderController.getBidsByCropId);
 
 // Route to place a bid
-router.post('/createbid/:cropId/:buyerId', bidderController.placeBid);
+router.post('/createbid/:cropId', bidderController.placeBid);
 
 // Route to update a bid
 router.put('/updatebid/:id/:buyerId', bidderController.updateBid);

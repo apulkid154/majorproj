@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+// import { UserProvider, useUser } from './UserContext'; // Import UserContext
 import NavigationBar from './components/NavigationBar';
 import Homepage from './components/Homepage';
 import Registration from './components/Registration';
@@ -18,29 +19,35 @@ import { CartProvider } from './components/CartContext';
 import AdminDashboard from './components/AdminDashboard';
 import 'leaflet/dist/leaflet.css'; // Import Leaflet styles
 import ManageCrops from './components/ManageCrops';
+import BidderForm from './components/BidderForm';
+import ManageUsers from './components/ManageUsers';
+
+
 
 
 const App = () => {
   return (
-    <CartProvider>
-      <Router>
-        <div>
-          <Routes>
-            {/* General Routes */}
-            <Route path="/" element={<Homepage />} />
-            <Route path="/registration" element={<Registration />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/feedback" element={<Feedback />} />
-            <Route path="/cropform" element={<CropForm />} />
-            
-            {/* Farmer Routes */}
-            <Route path="/farmer" element={<FarmerNav />}>
+
+      <CartProvider>
+        <Router>
+          <div>
+            <Routes>
+              {/* General Routes */}
+              <Route path="/" element={<Homepage />} />
+              <Route path="/registration" element={<Registration />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/feedback" element={<Feedback />} />
+              <Route path="/cropform" element={<CropForm />} />
+              <Route path="/bidder" element={<BidderForm />} />
+              
+              <Route path="/farmer" element={<FarmerNav />}>
               <Route path="all-crops" element={<Allcrops />} />
               <Route path="add-crop" element={<CropForm />} />
               <Route path="my-crop-list" element={<MyCropList />} />
               <Route path="bidder-list" element={<BidderList />} />
               <Route path="cropdetails/:cropId" element={<CropDetails />} />
               <Route path="cart" element={<CartPage />} />
+              {/* <Route path="chat/:farmerId" element={<Chat />} /> */}
             </Route>
 
             {/* Buyer Routes */}
@@ -52,16 +59,18 @@ const App = () => {
 
             {/* Admin Routes */}
             <Route path="/admin" element={<AdminNav />}>
-              <Route path="dashboard" element={<AdminDashboard/>} />
-              <Route path="manage-crops" element={<ManageCrops/>} />
-
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="manage-crops" element={<ManageCrops />} />
+              <Route path="manage-users" element={<ManageUsers />} />
+              {/* <Route path="chat" element={<Chat />} /> */}
             </Route>
-
           </Routes>
-        </div>
-      </Router>
-    </CartProvider>
+          </div>
+        </Router>
+      </CartProvider>
+    
   );
 };
 
 export default App;
+

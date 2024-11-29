@@ -72,7 +72,7 @@ const CropDetails = () => {
         <div className="min-h-screen bg-gray-100 p-8">
             <h1 className="text-4xl font-bold mb-4">{crop.crop}</h1>
             <div className="flex bg-white shadow-md rounded-lg overflow-hidden">
-                <div className="w-1/2 p-4">
+                <div className="w-1/3 h-full min-h-[300px] p-4">
                     {crop.cropimage1 ? (
                         <img
                             src={crop.cropimage1} // Directly using the Cloudinary URL
@@ -106,22 +106,7 @@ const CropDetails = () => {
                         </div>
                     )}
 
-                    {/* Quantity Counter */}
-                    <div className="flex items-center mb-4">
-                        <button
-                            className="bg-gray-300 text-gray-700 px-2 py-1 rounded-md"
-                            onClick={decreaseQuantity}
-                        >
-                            -
-                        </button>
-                        <span className="mx-4 text-lg">{selectedQuantity}</span>
-                        <button
-                            className="bg-gray-300 text-gray-700 px-2 py-1 rounded-md"
-                            onClick={increaseQuantity}
-                        >
-                            +
-                        </button>
-                    </div>
+                    
 
                     {role === 'buyer' && (
                         <button
